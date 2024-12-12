@@ -46,7 +46,7 @@ def get_form_data():
 
     root.protocol("WM_DELETE_WINDOW", on_close)
 
-    tk.Label(root, text="Username:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
+    tk.Label(root, text="Email:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
     entry_username = tk.Entry(root, width=35)
     entry_username.grid(row=0, column=1, padx=10, pady=10)
 
@@ -185,6 +185,7 @@ for order in orders:
         results.append({"Pedido": order_number, "Dados Sincronizados": synced_text})
     except Exception as e:
         print(f"Erro ao processar um elemento: {e}")
+
 
 df = pd.DataFrame(results)
 df.to_excel(destination_path, index=False)
