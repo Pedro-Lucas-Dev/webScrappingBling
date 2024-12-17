@@ -20,9 +20,10 @@ def get_form_data():
         label_destination.config(text=destination_path if destination_path else "Nenhum destino selecionado")
 
     def submit():
-        global username, password, selected_filter
+        global username, password, selected_store, selected_filter
         username = entry_username.get()
         password = entry_password.get()
+        selected_store = store_mapping[filter_store.get()]
         selected_filter = filter_mapping[filter_combobox.get()]
         if not destination_path:
             label_warning.config(text="Por favor, selecione um destino para salvar o arquivo.")
@@ -31,13 +32,13 @@ def get_form_data():
 
     def on_close():
         root.destroy()
-        sys.exit(0)  
+        sys.exit(0)
 
     root = tk.Tk()
     root.title("Login e Filtro")
 
     window_width = 500
-    window_height = 300
+    window_height = 400
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     position_top = int(screen_height / 2 - window_height / 2)
@@ -54,7 +55,25 @@ def get_form_data():
     entry_password = tk.Entry(root, width=35, show="*")
     entry_password.grid(row=1, column=1, padx=10, pady=10)
 
-    tk.Label(root, text="Filtro de Situações:").grid(row=2, column=0, padx=10, pady=10, sticky="w")
+    tk.Label(root, text="Selecione uma Loja:").grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+    tk.Label(root, text="Filtro de Situações:").grid(row=3, column=0, padx=10, pady=10, sticky="w")
+
+    store_mapping = {
+        "Mercado Livre Coleta": "204328455",
+        "Todas as lojas": "todas",
+        "Nenhuma": "0",
+        "Amazon 1": "203706129",
+        "Amazon FBA Onsite": "204201543",
+        "Americanas": "203373883",
+        "Faturador Full": "203548425",
+        "Físico": "203424099",
+        "Loja Integrada": "204753253",
+        "Magalu 1": "203614193",
+        "Mercado Livre Full": "204338346",
+        "Mercado Shop": "204050358",
+        "Shopee": "203842216"
+    }
 
     filter_mapping = {
         "Em aberto": "6",
@@ -66,30 +85,29 @@ def get_form_data():
         "Verificado": "24",
         "Checkout parcial": "126724",
         "Aguardando Pagamento": "83869",
-        "Em andamento Marketplace": "321842",
-        "Atendido Coleta": "446467",
-        "Atendido Full": "446468",
-        "Atendido Etiquetas": "446626",
-        "Pendente de Pagamento Shopee": "447109",
         "Finalizado": "447110"
     }
 
+    filter_store = ttk.Combobox(root, values=list(store_mapping.keys()), state="readonly", width=32)
+    filter_store.grid(row=2, column=1, padx=10, pady=10)
+    filter_store.current(0)  
+
     filter_combobox = ttk.Combobox(root, values=list(filter_mapping.keys()), state="readonly", width=32)
-    filter_combobox.grid(row=2, column=1, padx=10, pady=10)
+    filter_combobox.grid(row=3, column=1, padx=10, pady=10)
     filter_combobox.current(1)  
 
-    tk.Label(root, text="Destino do Arquivo:").grid(row=3, column=0, padx=10, pady=10, sticky="w")
+    tk.Label(root, text="Destino do Arquivo:").grid(row=4, column=0, padx=10, pady=10, sticky="w")
     label_destination = tk.Label(root, text="Nenhum destino selecionado", width=35, anchor="w")
-    label_destination.grid(row=3, column=1, padx=10, pady=10)
+    label_destination.grid(row=4, column=1, padx=10, pady=10)
 
     select_button = tk.Button(root, text="Selecionar Destino", command=select_destination, width=20)
-    select_button.grid(row=4, column=0, columnspan=2, pady=5)
+    select_button.grid(row=5, column=0, columnspan=2, pady=5)
 
     label_warning = tk.Label(root, text="", fg="red", wraplength=400)
-    label_warning.grid(row=5, column=0, columnspan=2, pady=5)
+    label_warning.grid(row=6, column=0, columnspan=2, pady=5)
 
     submit_button = tk.Button(root, text="Enviar", command=submit, width=15)
-    submit_button.grid(row=6, column=0, columnspan=2, pady=10)
+    submit_button.grid(row=7, column=0, columnspan=2, pady=10)
 
     root.mainloop()
 
@@ -114,6 +132,7 @@ button_login = driver.find_element(By.CLASS_NAME, "login-button-submit")
 button_login.click()
 
 time.sleep(3)
+
 driver.get(newUrl)
 
 clear_link = WebDriverWait(driver, 10).until(
@@ -123,15 +142,15 @@ clear_link.click()
 
 time.sleep(2)
 
-dropdown_div = WebDriverWait(driver, 10).until(
+dropdown_store = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, "lojasVinculadas-container"))
 )
-dropdown_div.click()
+dropdown_store.click()
 
-mercado_livre_option = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.XPATH, '//li[@data-id="204328455"]'))
+option_store = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, f"//li[@data-id='{selected_store}']"))
 )
-mercado_livre_option.click()
+option_store.click()
 
 time.sleep(2)
 
